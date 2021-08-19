@@ -8,13 +8,13 @@ import {
 } from '@apollo/client';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
+import Select from '@material-ui/core/Select/Select';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 
 import { useAppSelector, useAppDispatch } from '../../reducers/hooks';
-import Select from '../../components/Select';
 import Chip from '../../components/Chip';
-import { addMetric } from '../../reducers/metricReducer';
+import { addMetric, deleteMetric } from '../../reducers/metricReducer';
 
 const client = new ApolloClient({
   uri: 'https://react.eogresources.com/graphql',
@@ -57,6 +57,10 @@ const MetricSelectInput: FC = () => {
     }
   };
 
+  const handleDelete = (value: string) => {
+    dispatch(deleteMetric(value));
+  };
+
   if (loading) return <LinearProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
   if (!data) return <Select autoWidth native={false} multiple={false} value=''><MenuItem>No Metric</MenuItem></Select>;
@@ -87,7 +91,7 @@ const MetricSelectInput: FC = () => {
             <div>
               {Array.isArray(metrics)
               && metrics.map((metric: string) => (
-                <Chip key={metric} label={metric} />
+                <Chip key={metric} label={metric} onDelete={() => handleDelete(metric)} />
               ))}
             </div>
           );

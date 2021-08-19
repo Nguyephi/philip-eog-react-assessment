@@ -14,7 +14,13 @@ export const metricSlice = createSlice({
     addMetric: (state, action: PayloadAction<string>) => {
       state.metrics = [...state.metrics, action.payload];
     },
+    deleteMetric: (state, action: PayloadAction<string>) => {
+      state.metrics = state.metrics.filter((metric: string) => metric !== action.payload);
+    },
+    clearSelectedMetrics: (state) => {
+      state.metrics = [];
+    },
   },
 });
 
-export const { addMetric } = metricSlice.actions;
+export const { addMetric, deleteMetric, clearSelectedMetrics } = metricSlice.actions;
