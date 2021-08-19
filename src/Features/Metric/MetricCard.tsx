@@ -9,6 +9,7 @@ import {
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
+import CardContent from '@material-ui/core/CardContent';
 
 const client = new ApolloClient({
   uri: 'https://react.eogresources.com/graphql',
@@ -52,12 +53,14 @@ const MetricCards: FC<SelectedMetric> = ({ metric }: SelectedMetric) => {
 
   return (
     <Card>
-      <Typography variant="h5" component="h2">
-        {metric}
-      </Typography>
-      <Typography variant="body2" component="p">
-        {value} {unit}
-      </Typography>
+      <CardContent>
+        <Typography variant="h5" component="h2">
+          {metric}
+        </Typography>
+        <Typography variant="body2" component="p">
+          {value} {unit}
+        </Typography>
+      </CardContent>
     </Card>
   );
 };
