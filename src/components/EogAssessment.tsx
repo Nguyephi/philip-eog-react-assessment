@@ -3,6 +3,7 @@ import Grid from '@material-ui/core/Grid';
 
 import MetricSelectInput from '../Features/Metric/MetricSelectInput';
 import RenderMetricCards from '../Features/Metric/RenderMetricCards';
+import MetricGraph from '../Features/Metric/MetricGraph';
 
 const EogAssessment = () => (
   <Grid container>
@@ -11,6 +12,9 @@ const EogAssessment = () => (
     </Grid>
     <Grid item xs={12}>
       <RenderMetricCards />
+    </Grid>
+    <Grid item xs={12}>
+      <MetricGraph />
     </Grid>
   </Grid>
 );
