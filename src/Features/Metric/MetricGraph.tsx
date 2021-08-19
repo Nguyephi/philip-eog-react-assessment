@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useState, useEffect } from 'react';
 import {
   ApolloClient,
   ApolloProvider,
@@ -17,17 +17,17 @@ const client = new ApolloClient({
 });
 
 const query = gql`
-query ($input: [MeasurementQuery]) {
-  getMultipleMeasurements(input: $input) {
-    metric
-    measurements {
+  query ($input: [MeasurementQuery]!) {
+    getMultipleMeasurements(input: $input) {
       metric
-      at
-      value
-      unit
+      measurements {
+        metric
+        value
+        at
+        unit
+      }
     }
   }
-}
 `;
 
 type Measurements = {
@@ -44,26 +44,36 @@ type MetricGraphResponse = {
   getMultipleMeasurements: MetricGraphData[];
 };
 
+interface MetricGraphRequest {
+  metricName: string;
+  after: number;
+}
+
 const MetricGraph: FC = () => {
   const selectedMetrics = useAppSelector(state => state.metrics.metrics);
-  const minutes = 30;
-  const currentTime = new Date();
-  const after = new Date(currentTime.getTime() - minutes * 60000).valueOf();
+  const [metricQuery, setMetricQuery] = useState<MetricGraphRequest[]>([]);
 
-  const measurementQuery = selectedMetrics.length
-    ? selectedMetrics.map((metricName: string) => ({
+  useEffect(() => {
+    if (!selectedMetrics.length) {
+      return;
+    }
+    const minutes = 30;
+    const currentTime = new Date();
+    const after = new Date(currentTime.getTime() - minutes * 60000).valueOf();
+    setMetricQuery(selectedMetrics.map((metricName: string) => ({
       metricName,
       after,
-    }))
-    : [];
-  console.log('arr', measurementQuery);
+    })));
+  }, [selectedMetrics]);
+
   const { loading, error, data } = useQuery<MetricGraphResponse>(query, {
-    variables: { input: measurementQuery },
+    variables: { input: [...metricQuery] },
   });
-  // console.log('data', data);
   if (loading) return <LinearProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
   if (!data) return null;
+  console.log('metricQuery', metricQuery);
+  console.log('data', data);
   return <div>graph</div>;
 };
 
