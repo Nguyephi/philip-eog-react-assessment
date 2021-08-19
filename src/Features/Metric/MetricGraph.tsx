@@ -8,7 +8,6 @@ import {
 } from '@apollo/client';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
-// import CardContent from '@material-ui/core/CardContent';
 
 import { useAppSelector } from '../../reducers/hooks';
 
