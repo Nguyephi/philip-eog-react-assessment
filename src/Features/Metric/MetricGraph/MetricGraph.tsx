@@ -255,6 +255,7 @@ const MetricGraph: FC = () => {
               dataKey={metric.metricName}
               stroke={`#${metric.stroke}`}
               dot={false}
+              isAnimationActive={false}
             />
           ))
         }
