@@ -12,9 +12,9 @@ import Select from '@material-ui/core/Select/Select';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 
-import { useAppSelector, useAppDispatch } from '../../reducers/hooks';
-import Chip from '../../components/Chip';
-import { addMetric, deleteMetric } from '../../reducers/metricReducer';
+import { useAppSelector, useAppDispatch } from '../../../reducers/hooks';
+import Chip from '../../../components/Chip';
+import { addMetric, deleteMetric } from '../../../reducers/metricReducer';
 
 const client = new ApolloClient({
   uri: 'https://react.eogresources.com/graphql',
@@ -41,7 +41,7 @@ const MetricSelectInput: FC = () => {
   const dispatch = useAppDispatch();
   const { loading, error, data } = useQuery<MetricListResponse>(query);
   const [open, setOpen] = useState(false);
-  const selectedMetrics = useAppSelector(state => state.metrics.metrics);
+  const selectedMetrics = useAppSelector((state) => state.metrics.metrics);
 
   const handleOpen = () => {
     setOpen(!open);
@@ -50,10 +50,10 @@ const MetricSelectInput: FC = () => {
   const handleSelect = (e: { target: { value: any; }; }) => {
     const selectedValues = e.target.value;
     const selectedValue = selectedValues.filter(
-      (metric: string) => !selectedMetrics.includes(metric),
+      (metric: string) => !selectedMetrics.find(m => m.metricName === metric),
     );
     if (selectedValue.length) {
-      dispatch(addMetric(selectedValue[0]));
+      dispatch(addMetric(selectedValue[selectedValue.length - 1]));
     }
   };
 
@@ -90,8 +90,12 @@ const MetricSelectInput: FC = () => {
           return (
             <div>
               {Array.isArray(metrics)
-              && metrics.map((metric: string) => (
-                <Chip key={metric} label={metric} onDelete={() => handleDelete(metric)} />
+              && metrics.map(({ metricName }) => (
+                <Chip
+                  key={metricName}
+                  label={metricName}
+                  onDelete={() => handleDelete(metricName)}
+                />
               ))}
             </div>
           );
