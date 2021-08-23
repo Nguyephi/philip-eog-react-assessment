@@ -259,7 +259,7 @@ const MetricGraph: FC = () => {
           ))
         }
         <CartesianGrid strokeDasharray="3 3" />
-        <Tooltip />
+        <Tooltip labelFormatter={(value: number) => new Date(value).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })} />
         <Legend />
       </LineChart>
     </ResponsiveContainer>
