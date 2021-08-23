@@ -7,6 +7,7 @@ import {
   YAxis,
   Tooltip,
   Line,
+  Legend,
 } from 'recharts';
 import {
   ApolloClient,
@@ -14,14 +15,41 @@ import {
   useQuery,
   gql,
   InMemoryCache,
+  split,
+  HttpLink,
 } from '@apollo/client';
+import { getMainDefinition } from '@apollo/client/utilities';
+import { WebSocketLink } from '@apollo/client/link/ws';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
 
 import { useAppSelector } from '../../../reducers/hooks';
 
-const client = new ApolloClient({
+const httpLink = new HttpLink({
   uri: 'https://react.eogresources.com/graphql',
+});
+
+const wsLink = new WebSocketLink({
+  uri: 'ws://react.eogresources.com/graphql',
+  options: {
+    reconnect: true,
+  },
+});
+
+const splitLink = split(
+  ({ query }) => {
+    const definition = getMainDefinition(query);
+    return (
+      definition.kind === 'OperationDefinition'
+      && definition.operation === 'subscription'
+    );
+  },
+  wsLink,
+  httpLink,
+);
+
+const client = new ApolloClient({
+  link: splitLink,
   cache: new InMemoryCache(),
 });
 
@@ -39,6 +67,17 @@ const query = gql`
   }
 `;
 
+const subscription = gql`
+  subscription newMeasurement {
+    newMeasurement {
+      metric
+      at
+      value
+      unit
+    }
+  }
+`;
+
 type Measurements = {
   metric: string
   at: number
@@ -51,6 +90,7 @@ type MetricGraphData = {
 };
 type MetricGraphResponse = {
   getMultipleMeasurements: MetricGraphData[];
+  newMeasurement: Measurements;
 };
 
 interface MetricGraphRequest {
@@ -80,19 +120,60 @@ const MetricGraph: FC = () => {
     setMetricQuery(selectedMetricQuery);
   }, [selectedMetrics]);
 
-  const { loading, error, data } = useQuery<MetricGraphResponse>(query, {
+  const { subscribeToMore, ...result } = useQuery<MetricGraphResponse>(query, {
     variables: { input: [...metricQuery] },
   });
+  const { loading, error, data } = result;
   if (loading) return <LinearProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
   if (!data || !selectedMetrics.length) return null;
 
   const { getMultipleMeasurements: graphMeasurements } = data;
 
+  if (graphMeasurements.length) {
+    subscribeToMore({
+      document: subscription,
+      variables: null,
+      updateQuery: (
+        prev,
+        { subscriptionData },
+      ): MetricGraphResponse => {
+        if (!subscriptionData) return prev;
+        const newFeedItem = subscriptionData.data;
+        const { metric, at } = newFeedItem.newMeasurement;
+        const { getMultipleMeasurements } = prev;
+        const selectedMeasurement: MetricGraphData | undefined = getMultipleMeasurements?.find(
+          m => m.metric === metric,
+        );
+        if (!selectedMeasurement) return prev;
+        const measurements = [...selectedMeasurement.measurements];
+        if (at > measurements[measurements.length - 1].at) {
+          measurements.push(newFeedItem.newMeasurement);
+        }
+        const newMulti = getMultipleMeasurements.map(m => {
+          const temp = { ...m };
+          if (m.metric !== metric) {
+            return m;
+          }
+          temp.measurements = measurements;
+          return temp;
+        });
+        prev = {
+          ...prev,
+          getMultipleMeasurements: newMulti,
+        };
+        return { ...prev };
+      },
+    });
+  }
+
   const formatXAxis = (tickItem: number) => new Date(tickItem).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 
   const handleFirstDataSet = () => {
     const chartData: any[] = [];
+    if (!graphMeasurements) {
+      return [];
+    }
     graphMeasurements[0].measurements.forEach((m) => {
       chartData.push({
         at: m.at,
@@ -104,10 +185,13 @@ const MetricGraph: FC = () => {
 
   const handleMultiDataSet = (dataSet: any[]) => {
     const chartData = [...dataSet];
+    if (!graphMeasurements) {
+      return [];
+    }
     selectedMetrics.forEach((metric, idx) => {
       if (!Object.prototype.hasOwnProperty.call(chartData[idx], metric.metricName)) {
         graphMeasurements[idx].measurements.forEach((m, mIdx) => {
-          if (m.at === chartData[mIdx].at) {
+          if (m?.at === chartData[mIdx]?.at) {
             chartData[mIdx] = {
               [m.metric]: m.value,
               ...chartData[mIdx],
@@ -121,7 +205,7 @@ const MetricGraph: FC = () => {
 
   const getChartData = () => {
     let chartData: any[] = [];
-    if (!graphMeasurements.length) {
+    if (!graphMeasurements || !graphMeasurements.length) {
       return [];
     }
 
@@ -148,7 +232,7 @@ const MetricGraph: FC = () => {
           allowDuplicatedCategory={false}
         />
         {
-          graphMeasurements.map((graph) => (
+          graphMeasurements?.map((graph) => (
             <YAxis
               interval="preserveStart"
               key={`yAxis-${graph.metric}`}
@@ -176,6 +260,7 @@ const MetricGraph: FC = () => {
         }
         <CartesianGrid strokeDasharray="3 3" />
         <Tooltip />
+        <Legend />
       </LineChart>
     </ResponsiveContainer>
   );
