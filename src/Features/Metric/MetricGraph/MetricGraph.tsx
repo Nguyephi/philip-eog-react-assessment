@@ -21,7 +21,8 @@ import {
 import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
 
-import { useAppSelector } from '../../../reducers/hooks';
+import { useAppSelector, useAppDispatch } from '../../../reducers/hooks';
+import { setGraphData } from '../../../reducers/metricReducer';
 
 const httpLink = new HttpLink({
   uri: 'https://react.eogresources.com/graphql',
@@ -91,59 +92,27 @@ type MetricGraphResponse = {
   newMeasurement: Measurements;
 };
 
+interface GraphDataset {
+  [key: string]: number;
+  at: number;
+}
+
 const MetricGraph: FC = () => {
+  const dispatch = useAppDispatch();
   const selectedMetrics = useAppSelector(state => state.metrics.metrics);
   const metricQuery = useAppSelector(state => state.metrics.metricQuery);
+  const graphData = useAppSelector(state => state.metrics.graphData);
 
   const { subscribeToMore, loading, data } = useQuery<MetricGraphResponse>(graphQuery, {
     variables: { input: [...metricQuery] },
     // fetchPolicy: 'no-cache',
   });
-  //Toast errors
+  // Toast errors
   // if (loading) return <LinearProgress />;
   // if (error) return <Typography color="error">{error}</Typography>;
   if (!data || !selectedMetrics.length) return null;
 
   const { getMultipleMeasurements: graphMeasurements } = data;
-
-  if (graphMeasurements.length) {
-    subscribeToMore({
-      document: subscription,
-      variables: null,
-      updateQuery: (
-        prev,
-        { subscriptionData },
-      ): MetricGraphResponse => {
-        if (!subscriptionData) return prev;
-        const newFeedItem = subscriptionData.data;
-        const { metric, at } = newFeedItem.newMeasurement;
-        const { getMultipleMeasurements } = prev;
-        const selectedMeasurement: MetricGraphData | undefined = getMultipleMeasurements?.find(
-          m => m.metric === metric,
-        );
-        if (!selectedMeasurement) return prev;
-        const measurements = [...selectedMeasurement.measurements];
-        if (at > measurements[measurements.length - 1].at) {
-          measurements.push(newFeedItem.newMeasurement);
-        }
-        const newMulti = getMultipleMeasurements.map(m => {
-          const temp = { ...m };
-          if (m.metric !== metric) {
-            return m;
-          }
-          temp.measurements = measurements;
-          return temp;
-        });
-        prev = {
-          ...prev,
-          getMultipleMeasurements: newMulti,
-        };
-        return { ...prev };
-      },
-    });
-  }
-
-  const formatXAxis = (tickItem: number) => new Date(tickItem).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 
   const handleFirstDataSet = () => {
     const chartData: any[] = [];
@@ -191,9 +160,54 @@ const MetricGraph: FC = () => {
     return chartData;
   };
 
+  if (graphMeasurements.every(graph => graph.measurements.length > graphData.length)) {
+    const newGraphData: GraphDataset[] = getChartData();
+    dispatch(setGraphData(newGraphData));
+  }
+
+  if (graphMeasurements.length) {
+    // console.log('check', graphMeasurements);
+    subscribeToMore({
+      document: subscription,
+      variables: null,
+      updateQuery: (
+        prev,
+        { subscriptionData },
+      ): MetricGraphResponse => {
+        if (!subscriptionData) return prev;
+        const newFeedItem = subscriptionData.data;
+        const { metric, at } = newFeedItem.newMeasurement;
+        const { getMultipleMeasurements } = prev;
+        const selectedMeasurement: MetricGraphData | undefined = getMultipleMeasurements?.find(
+          m => m.metric === metric,
+        );
+        if (!selectedMeasurement) return prev;
+        const measurements = [...selectedMeasurement.measurements];
+        if (at > measurements[measurements.length - 1].at) {
+          measurements.push(newFeedItem.newMeasurement);
+        }
+        const newMulti = getMultipleMeasurements.map(m => {
+          const temp = { ...m };
+          if (m.metric !== metric) {
+            return m;
+          }
+          temp.measurements = measurements;
+          return temp;
+        });
+        prev = {
+          ...prev,
+          getMultipleMeasurements: newMulti,
+        };
+        return { ...prev };
+      },
+    });
+  }
+
+  const formatXAxis = (tickItem: number) => new Date(tickItem).toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
   return (
     <ResponsiveContainer height={500}>
-      <LineChart data={getChartData()}>
+      <LineChart data={graphData}>
         <XAxis
           dataKey="at"
           tickFormatter={formatXAxis}
