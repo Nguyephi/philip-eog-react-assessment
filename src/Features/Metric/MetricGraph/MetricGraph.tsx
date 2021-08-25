@@ -1,4 +1,4 @@
-import React, { FC, useState, useEffect } from 'react';
+import React, { FC } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -20,8 +20,6 @@ import {
 } from '@apollo/client';
 import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
-import LinearProgress from '@material-ui/core/LinearProgress';
-import Typography from '@material-ui/core/Typography';
 
 import { useAppSelector } from '../../../reducers/hooks';
 
@@ -53,7 +51,7 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-const query = gql`
+const graphQuery = gql`
   query ($input: [MeasurementQuery]!) {
     getMultipleMeasurements(input: $input) {
       metric
@@ -93,39 +91,17 @@ type MetricGraphResponse = {
   newMeasurement: Measurements;
 };
 
-interface MetricGraphRequest {
-  metricName: string;
-  after: number;
-}
-
 const MetricGraph: FC = () => {
   const selectedMetrics = useAppSelector(state => state.metrics.metrics);
-  const [metricQuery, setMetricQuery] = useState<MetricGraphRequest[]>([]);
-  const [startTime, setStartTime] = useState<number>(0);
+  const metricQuery = useAppSelector(state => state.metrics.metricQuery);
 
-  useEffect(() => {
-    if (!selectedMetrics.length) {
-      setStartTime(0);
-      return;
-    }
-    const minutes = 30;
-    const currentTime = new Date();
-    const after = startTime > 0
-      ? startTime
-      : new Date(currentTime.getTime() - minutes * 60000).valueOf();
-    const selectedMetricQuery = selectedMetrics.map(({ metricName }) => ({
-      metricName,
-      after,
-    }));
-    setMetricQuery(selectedMetricQuery);
-  }, [selectedMetrics]);
-
-  const { subscribeToMore, ...result } = useQuery<MetricGraphResponse>(query, {
+  const { subscribeToMore, loading, data } = useQuery<MetricGraphResponse>(graphQuery, {
     variables: { input: [...metricQuery] },
+    // fetchPolicy: 'no-cache',
   });
-  const { loading, error, data } = result;
-  if (loading) return <LinearProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  //Toast errors
+  // if (loading) return <LinearProgress />;
+  // if (error) return <Typography color="error">{error}</Typography>;
   if (!data || !selectedMetrics.length) return null;
 
   const { getMultipleMeasurements: graphMeasurements } = data;
@@ -171,9 +147,6 @@ const MetricGraph: FC = () => {
 
   const handleFirstDataSet = () => {
     const chartData: any[] = [];
-    if (!graphMeasurements) {
-      return [];
-    }
     graphMeasurements[0].measurements.forEach((m) => {
       chartData.push({
         at: m.at,
@@ -185,11 +158,8 @@ const MetricGraph: FC = () => {
 
   const handleMultiDataSet = (dataSet: any[]) => {
     const chartData = [...dataSet];
-    if (!graphMeasurements) {
-      return [];
-    }
     selectedMetrics.forEach((metric, idx) => {
-      if (!Object.prototype.hasOwnProperty.call(chartData[idx], metric.metricName)) {
+      if (!Object.prototype.hasOwnProperty.call(graphMeasurements[idx], metric.metricName)) {
         graphMeasurements[idx].measurements.forEach((m, mIdx) => {
           if (m?.at === chartData[mIdx]?.at) {
             chartData[mIdx] = {
@@ -222,7 +192,7 @@ const MetricGraph: FC = () => {
   };
 
   return (
-    <ResponsiveContainer height={500} width="90%">
+    <ResponsiveContainer height={500}>
       <LineChart data={getChartData()}>
         <XAxis
           dataKey="at"

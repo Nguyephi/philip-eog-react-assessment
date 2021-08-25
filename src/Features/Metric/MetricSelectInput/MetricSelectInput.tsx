@@ -14,9 +14,9 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { useAppDispatch } from '../../../reducers/hooks';
+import { useAppSelector, useAppDispatch } from '../../../reducers/hooks';
 import Chip from '../../../components/Chip';
-import { addMetric, deleteMetric } from '../../../reducers/metricReducer';
+import { addMetric, deleteMetric, setStartTime } from '../../../reducers/metricReducer';
 
 const client = new ApolloClient({
   uri: 'https://react.eogresources.com/graphql',
@@ -67,6 +67,7 @@ type MetricListResponse = {
 const MetricSelectInput: FC = () => {
   const dispatch = useAppDispatch();
   const classes = useStyles();
+  const startTime = useAppSelector(state => state.metrics.startTime);
   const [selectedMetrics, setSelectedMetrics] = useState([]);
   const { loading, error, data } = useQuery<MetricListResponse>(query);
   const [open, setOpen] = useState(false);
@@ -78,10 +79,18 @@ const MetricSelectInput: FC = () => {
   const handleSelect = (e: { target: { value: any; }; }) => {
     const selectedValues = e.target.value;
     const newSelectedValue = selectedValues[selectedValues.length - 1];
-    if (selectedValues.length && newSelectedValue.length) {
-      dispatch(addMetric(selectedValues[selectedValues.length - 1]));
-      setSelectedMetrics(selectedValues);
+    const minutes = 30;
+    const currentTime = new Date();
+    const after = startTime > 0
+      ? startTime
+      : new Date(currentTime.getTime() - minutes * 60000).valueOf();
+    if (!selectedValues.length || !newSelectedValue.length) {
+      dispatch(setStartTime(0));
+      return;
     }
+    dispatch(setStartTime(after));
+    dispatch(addMetric({ metricName: newSelectedValue, after }));
+    setSelectedMetrics(selectedValues);
   };
 
   const handleDelete = (value: string) => {
