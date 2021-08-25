@@ -49,8 +49,8 @@ const useStyles = makeStyles((theme) => ({
     margin: 'auto',
   },
   chip: {
-    marginLeft: theme.spacing(1/2),
-    marginRight: theme.spacing(1/2),
+    marginLeft: theme.spacing(1 / 2),
+    marginRight: theme.spacing(1 / 2),
   },
 }));
 
