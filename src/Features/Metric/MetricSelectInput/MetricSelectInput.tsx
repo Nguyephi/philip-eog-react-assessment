@@ -16,7 +16,12 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { useAppSelector, useAppDispatch } from '../../../reducers/hooks';
 import Chip from '../../../components/Chip';
-import { addMetric, deleteMetric, setStartTime } from '../../../reducers/metricReducer';
+import {
+  addMetric,
+  deleteMetric,
+  setStartTime,
+  clearSelectedMetrics,
+} from '../../../reducers/metricReducer';
 
 const client = new ApolloClient({
   uri: 'https://react.eogresources.com/graphql',
@@ -76,6 +81,11 @@ const MetricSelectInput: FC = () => {
     setOpen(!open);
   };
 
+  const handleDelete = (value: string) => {
+    dispatch(deleteMetric(value));
+    setSelectedMetrics(selectedMetrics.filter(m => m !== value));
+  };
+
   const handleSelect = (e: { target: { value: any; }; }) => {
     const selectedValues = e.target.value;
     const newSelectedValue = selectedValues[selectedValues.length - 1];
@@ -85,17 +95,18 @@ const MetricSelectInput: FC = () => {
       ? startTime
       : new Date(currentTime.getTime() - minutes * 60000).valueOf();
     if (!selectedValues.length || !newSelectedValue.length) {
-      dispatch(setStartTime(0));
+      dispatch(clearSelectedMetrics());
+      setSelectedMetrics([]);
+      return;
+    }
+    if (selectedValues.length < selectedMetrics.length) {
+      const deletedValue = selectedMetrics.filter(m => !selectedValues.includes(m));
+      handleDelete(deletedValue[0]);
       return;
     }
     dispatch(setStartTime(after));
     dispatch(addMetric({ metricName: newSelectedValue, after }));
     setSelectedMetrics(selectedValues);
-  };
-
-  const handleDelete = (value: string) => {
-    dispatch(deleteMetric(value));
-    setSelectedMetrics(selectedMetrics.filter(m => m !== value));
   };
 
   if (loading) return <LinearProgress />;
