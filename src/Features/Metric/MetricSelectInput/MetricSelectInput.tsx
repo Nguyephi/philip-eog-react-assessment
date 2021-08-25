@@ -86,6 +86,7 @@ const MetricSelectInput: FC = () => {
 
   const handleDelete = (value: string) => {
     dispatch(deleteMetric(value));
+    setSelectedMetrics(selectedMetrics.filter(m => m !== value));
   };
 
   if (loading) return <LinearProgress />;
