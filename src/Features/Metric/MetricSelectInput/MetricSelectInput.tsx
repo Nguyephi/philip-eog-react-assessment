@@ -8,11 +8,13 @@ import {
 } from '@apollo/client';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid';
 import Select from '@material-ui/core/Select/Select';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
+import { makeStyles } from '@material-ui/core/styles';
 
-import { useAppSelector, useAppDispatch } from '../../../reducers/hooks';
+import { useAppDispatch } from '../../../reducers/hooks';
 import Chip from '../../../components/Chip';
 import { addMetric, deleteMetric } from '../../../reducers/metricReducer';
 
@@ -27,6 +29,31 @@ const query = gql`
   }
 `;
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+    display: 'block',
+    height: theme.spacing(25),
+    [theme.breakpoints.down('xs')]: {
+      height: theme.spacing(35),
+    },
+  },
+  title: {
+    marginTop: theme.spacing(5),
+    textAlign: 'center',
+  },
+  select: {
+    marginTop: theme.spacing(2),
+    display: 'flex',
+    width: '80%',
+    margin: 'auto',
+  },
+  chip: {
+    marginLeft: theme.spacing(1/2),
+    marginRight: theme.spacing(1/2),
+  },
+}));
+
 class Metrics {
   metric!: string;
 }
@@ -39,9 +66,10 @@ type MetricListResponse = {
 
 const MetricSelectInput: FC = () => {
   const dispatch = useAppDispatch();
+  const classes = useStyles();
+  const [selectedMetrics, setSelectedMetrics] = useState([]);
   const { loading, error, data } = useQuery<MetricListResponse>(query);
   const [open, setOpen] = useState(false);
-  const selectedMetrics = useAppSelector((state) => state.metrics.metrics);
 
   const handleOpen = () => {
     setOpen(!open);
@@ -49,11 +77,10 @@ const MetricSelectInput: FC = () => {
 
   const handleSelect = (e: { target: { value: any; }; }) => {
     const selectedValues = e.target.value;
-    const selectedValue = selectedValues.filter(
-      (metric: string) => !selectedMetrics.find(m => m.metricName === metric),
-    );
-    if (selectedValue.length) {
-      dispatch(addMetric(selectedValue[selectedValue.length - 1]));
+    const newSelectedValue = selectedValues[selectedValues.length - 1];
+    if (selectedValues.length && newSelectedValue.length) {
+      dispatch(addMetric(selectedValues[selectedValues.length - 1]));
+      setSelectedMetrics(selectedValues);
     }
   };
 
@@ -66,51 +93,63 @@ const MetricSelectInput: FC = () => {
   if (!data) return <Select autoWidth native={false} multiple={false} value=''><MenuItem>No Metric</MenuItem></Select>;
   const { getMetrics } = data;
   return (
-    <FormControl fullWidth>
-      <Select
-        MenuProps={{
-          anchorOrigin: {
-            vertical: 'bottom',
-            horizontal: 'left',
-          },
-          getContentAnchorEl: null,
-        }}
-        autoWidth={false}
-        native={false}
-        multiple
-        open={open}
-        onClick={handleOpen}
-        onChange={handleSelect}
-        value={selectedMetrics}
-        displayEmpty
-        renderValue={(metrics) => {
-          if (!Array.isArray(metrics) || !metrics.length) {
-            return 'Select...';
-          }
-          return (
-            <div>
-              {Array.isArray(metrics)
-              && metrics.map(({ metricName }) => (
-                <Chip
-                  key={metricName}
-                  label={metricName}
-                  onDelete={() => handleDelete(metricName)}
-                />
-              ))}
-            </div>
-          );
-        }}
-      >
-        {
-          Array.isArray(getMetrics)
-          && getMetrics.map((metric: string) => (
-            <MenuItem key={metric} value={metric}>
-              {metric}
-            </MenuItem>
-          ))
-        }
-      </Select>
-    </FormControl>
+    <Grid container className={classes.root}>
+      <Grid item className={classes.title}>
+        <Typography variant="h2">
+          Metric Measurements
+        </Typography>
+      </Grid>
+      <Grid item className={classes.select}>
+        <FormControl fullWidth>
+          <Select
+            variant="outlined"
+            MenuProps={{
+              anchorOrigin: {
+                vertical: 'bottom',
+                horizontal: 'left',
+              },
+              getContentAnchorEl: null,
+            }}
+            autoWidth={false}
+            native={false}
+            multiple
+            open={open}
+            onClick={handleOpen}
+            onChange={handleSelect}
+            value={selectedMetrics}
+            displayEmpty
+            renderValue={(metricsList) => {
+              if (!Array.isArray(metricsList) || !metricsList.length) {
+                return 'Select...';
+              }
+              return (
+                <div>
+                  {metricsList.map((metricName) => (
+                    <Chip
+                      key={metricName}
+                      label={metricName}
+                      onDelete={() => handleDelete(metricName)}
+                      classes={{
+                        root: classes.chip,
+                      }}
+                    />
+                  ))}
+                </div>
+              );
+            }}
+          >
+            {
+              Array.isArray(getMetrics)
+              && getMetrics.map((metric: string) => (
+                <MenuItem key={metric} value={metric}>
+                  {metric}
+                </MenuItem>
+              ))
+            }
+          </Select>
+        </FormControl>
+      </Grid>
+    </Grid>
   );
 };
 
