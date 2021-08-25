@@ -6,10 +6,11 @@ import {
   gql,
   InMemoryCache,
 } from '@apollo/client';
-import LinearProgress from '@material-ui/core/LinearProgress';
+// import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
+import { makeStyles } from '@material-ui/core/styles';
 
 const client = new ApolloClient({
   uri: 'https://react.eogresources.com/graphql',
@@ -27,6 +28,13 @@ const query = gql`
   }
 `;
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+    width: theme.spacing(30),
+  },
+}));
+
 type MetricCardData = {
   metric: string;
   at: number;
@@ -42,19 +50,21 @@ interface SelectedMetric {
 }
 
 const MetricCards: FC<SelectedMetric> = ({ metric }: SelectedMetric) => {
-  const { loading, error, data } = useQuery<MetricCardsResponse>(query, {
+  const classes = useStyles();
+  const { data } = useQuery<MetricCardsResponse>(query, {
     variables: { metricName: metric },
     pollInterval: 5000,
   });
-  if (loading) return <LinearProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  // if (loading) return <LinearProgress />;
+  // handle error with toast
+  // if (error) return <Typography color="error">{error}</Typography>;
   if (!data) return null;
   const { value, unit } = data.getLastKnownMeasurement;
 
   return (
-    <Card>
+    <Card className={classes.root}>
       <CardContent>
-        <Typography variant="h5" component="h2">
+        <Typography variant="h6" component="h2">
           {metric}
         </Typography>
         <Typography variant="body2" component="p">
