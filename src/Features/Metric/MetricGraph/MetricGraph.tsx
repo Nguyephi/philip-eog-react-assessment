@@ -166,7 +166,6 @@ const MetricGraph: FC = () => {
   }
 
   if (graphMeasurements.length) {
-    // console.log('check', graphMeasurements);
     subscribeToMore({
       document: subscription,
       variables: null,
@@ -231,13 +230,13 @@ const MetricGraph: FC = () => {
           ))
         }
         {
-          selectedMetrics.map((metric) => (
+          graphMeasurements.map((graph, idx) => (
             <Line
-              key={`line-${metric.metricName}`}
-              yAxisId={metric.metricName}
+              key={`line-${graph.metric}`}
+              yAxisId={graph.metric}
               type="monotone"
-              dataKey={metric.metricName}
-              stroke={`#${metric.stroke}`}
+              dataKey={graph.metric}
+              stroke={`#${selectedMetrics[idx].stroke}`}
               dot={false}
               isAnimationActive={false}
             />
