@@ -56,10 +56,12 @@ export const metricSlice = createSlice({
     clearSelectedMetrics: (state) => {
       state.metrics = [];
       state.metricQuery = [];
+      state.graphData = [];
+      state.uniqueUnits = [];
       state.startTime = 0;
     },
-    setUniqueUnit: (state, action: PayloadAction<string>) => {
-      state.uniqueUnits = state.uniqueUnits.filter(unit => unit !== action.payload);
+    addUniqueUnit: (state, action: PayloadAction<string>) => {
+      state.uniqueUnits = [...state.uniqueUnits, action.payload];
     },
   },
 });
@@ -70,5 +72,5 @@ export const {
   setGraphData,
   setStartTime,
   clearSelectedMetrics,
-  setUniqueUnit,
+  addUniqueUnit,
 } = metricSlice.actions;

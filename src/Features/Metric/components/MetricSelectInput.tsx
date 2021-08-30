@@ -14,14 +14,14 @@ import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { useAppSelector, useAppDispatch } from '../../../reducers/hooks';
+import { useAppSelector, useAppDispatch } from '../selectors';
 import Chip from '../../../components/Chip';
 import {
   addMetric,
   deleteMetric,
   setStartTime,
   clearSelectedMetrics,
-} from '../../../reducers/metricReducer';
+} from '../reducer';
 
 const client = new ApolloClient({
   uri: 'https://react.eogresources.com/graphql',
@@ -40,12 +40,17 @@ const useStyles = makeStyles((theme) => ({
     display: 'block',
     height: theme.spacing(25),
     [theme.breakpoints.down('xs')]: {
-      height: theme.spacing(35),
+      height: theme.spacing(27),
     },
   },
-  title: {
+  titleContainer: {
     marginTop: theme.spacing(5),
     textAlign: 'center',
+  },
+  title: {
+    [theme.breakpoints.down('sm')]: {
+      fontSize: theme.spacing(6),
+    },
   },
   select: {
     marginTop: theme.spacing(2),
@@ -115,8 +120,8 @@ const MetricSelectInput: FC = () => {
   const { getMetrics } = data;
   return (
     <Grid container className={classes.root}>
-      <Grid item className={classes.title}>
-        <Typography variant="h2">
+      <Grid item className={classes.titleContainer}>
+        <Typography variant="h2" className={classes.title}>
           Metric Measurements
         </Typography>
       </Grid>

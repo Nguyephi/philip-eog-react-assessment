@@ -8,6 +8,7 @@ import Weather from '../Features/Weather/Weather';
 const useStyles = makeStyles({
   grow: {
     flexGrow: 1,
+    width: 350,
   },
 });
 
@@ -18,7 +19,7 @@ export default () => {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" color="inherit" className={classes.grow}>
+        <Typography variant="h6" color="inherit" className={classes.grow} noWrap>
           {name} EOG React Visualization Assessment
         </Typography>
         <Weather />

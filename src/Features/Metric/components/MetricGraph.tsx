@@ -21,8 +21,8 @@ import {
 import { getMainDefinition } from '@apollo/client/utilities';
 import { WebSocketLink } from '@apollo/client/link/ws';
 
-import { useAppSelector, useAppDispatch } from '../../../reducers/hooks';
-import { setGraphData } from '../../../reducers/metricReducer';
+import { useAppSelector, useAppDispatch } from '../selectors';
+import { setGraphData } from '../reducer';
 
 const httpLink = new HttpLink({
   uri: 'https://react.eogresources.com/graphql',
