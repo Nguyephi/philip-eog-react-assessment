@@ -1,10 +1,7 @@
 import React, { FC, useState } from 'react';
 import {
-  ApolloClient,
-  ApolloProvider,
   useQuery,
   gql,
-  InMemoryCache,
 } from '@apollo/client';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
@@ -22,11 +19,6 @@ import {
   setStartTime,
   clearSelectedMetrics,
 } from '../reducer';
-
-const client = new ApolloClient({
-  uri: 'https://react.eogresources.com/graphql',
-  cache: new InMemoryCache(),
-});
 
 const query = gql`
   query getMetrics {
@@ -179,8 +171,4 @@ const MetricSelectInput: FC = () => {
   );
 };
 
-export default () => (
-  <ApolloProvider client={client}>
-    <MetricSelectInput />
-  </ApolloProvider>
-);
+export default MetricSelectInput;

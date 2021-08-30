@@ -3,6 +3,9 @@ import { ToastContainer } from 'react-toastify';
 import { MuiThemeProvider, createTheme } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import 'react-toastify/dist/ReactToastify.css';
+import { ApolloProvider } from '@apollo/client';
+
+import client from './apolloClient';
 import Header from './components/Header';
 import Wrapper from './components/Wrapper';
 // import NowWhat from './components/NowWhat';
@@ -23,15 +26,17 @@ const theme = createTheme({
 });
 
 const App = () => (
-  <MuiThemeProvider theme={theme}>
-    <CssBaseline />
-    <Wrapper>
-      <Header />
-      {/* <NowWhat /> */}
-      <EogAssessment />
-      <ToastContainer />
-    </Wrapper>
-  </MuiThemeProvider>
+  <ApolloProvider client={client}>
+    <MuiThemeProvider theme={theme}>
+      <CssBaseline />
+      <Wrapper>
+        <Header />
+        {/* <NowWhat /> */}
+        <EogAssessment />
+        <ToastContainer />
+      </Wrapper>
+    </MuiThemeProvider>
+  </ApolloProvider>
 );
 
 export default App;

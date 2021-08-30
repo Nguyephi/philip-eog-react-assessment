@@ -1,19 +1,11 @@
 import React, { FC } from 'react';
 import {
-  ApolloClient,
-  ApolloProvider,
   useQuery,
   gql,
-  InMemoryCache,
 } from '@apollo/client';
 // import LinearProgress from '@material-ui/core/LinearProgress';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-
-const client = new ApolloClient({
-  uri: 'https://react.eogresources.com/graphql',
-  cache: new InMemoryCache(),
-});
 
 const query = gql`
   query ($metricName: String!) {
@@ -63,8 +55,4 @@ const MetricTableCell: FC<SelectedMetric> = ({ metric }: SelectedMetric) => {
   );
 };
 
-export default ({ metric }: SelectedMetric) => (
-  <ApolloProvider client={client}>
-    <MetricTableCell metric={metric} />
-  </ApolloProvider>
-);
+export default MetricTableCell;
