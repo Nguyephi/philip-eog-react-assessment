@@ -1,8 +1,4 @@
 import React, { FC, useState } from 'react';
-import {
-  useQuery,
-  gql,
-} from '@apollo/client';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
@@ -10,21 +6,18 @@ import Select from '@material-ui/core/Select/Select';
 import FormControl from '@material-ui/core/FormControl';
 import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles } from '@material-ui/core/styles';
+import { useQuery } from '@apollo/client';
 
-import { useAppSelector, useAppDispatch } from '../selectors';
-import Chip from '../../../components/Chip';
+import { useAppSelector, useAppDispatch } from '../../../utils/reduxSelectors';
 import {
   addMetric,
   deleteMetric,
   setStartTime,
   clearSelectedMetrics,
 } from '../reducer';
-
-const query = gql`
-  query getMetrics {
-    getMetrics
-  }
-`;
+import { getMetricQuery } from '../selectors';
+import { MetricListResponse } from '../types';
+import Chip from '../../../components/Chip';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -56,22 +49,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-class Metrics {
-  metric!: string;
-}
-type MetricList = {
-  getMetrics: Metrics[];
-};
-type MetricListResponse = {
-  getMetrics: MetricList;
-};
-
 const MetricSelectInput: FC = () => {
   const dispatch = useAppDispatch();
   const classes = useStyles();
   const startTime = useAppSelector(state => state.metrics.startTime);
   const [selectedMetrics, setSelectedMetrics] = useState([]);
-  const { loading, error, data } = useQuery<MetricListResponse>(query);
+  const { loading, error, data } = useQuery<MetricListResponse>(getMetricQuery);
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => {

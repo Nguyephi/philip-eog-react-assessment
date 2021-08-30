@@ -9,58 +9,12 @@ import {
   Line,
   Legend,
 } from 'recharts';
-import {
-  useQuery,
-  gql,
-} from '@apollo/client';
+import { useQuery } from '@apollo/client';
 
-import { useAppSelector, useAppDispatch } from '../selectors';
+import { useAppSelector, useAppDispatch } from '../../../utils/reduxSelectors';
 import { setGraphData } from '../reducer';
-
-const graphQuery = gql`
-  query ($input: [MeasurementQuery]!) {
-    getMultipleMeasurements(input: $input) {
-      metric
-      measurements {
-        metric
-        value
-        at
-        unit
-      }
-    }
-  }
-`;
-
-const subscription = gql`
-  subscription newMeasurement {
-    newMeasurement {
-      metric
-      at
-      value
-      unit
-    }
-  }
-`;
-
-type Measurements = {
-  metric: string
-  at: number
-  value: number
-  unit: string
-};
-type MetricGraphData = {
-  metric: string;
-  measurements: Measurements[];
-};
-type MetricGraphResponse = {
-  getMultipleMeasurements: MetricGraphData[];
-  newMeasurement: Measurements;
-};
-
-interface GraphDataset {
-  [key: string]: number;
-  at: number;
-}
+import { metricGraphQuery, metricGraphSubscription } from '../selectors';
+import { MetricGraphResponse, GraphDataset, MetricGraphData } from '../types';
 
 const MetricGraph: FC = () => {
   const dispatch = useAppDispatch();
@@ -68,7 +22,7 @@ const MetricGraph: FC = () => {
   const metricQuery = useAppSelector(state => state.metrics.metricQuery);
   const graphData = useAppSelector(state => state.metrics.graphData);
 
-  const { subscribeToMore, loading, data } = useQuery<MetricGraphResponse>(graphQuery, {
+  const { subscribeToMore, loading, data } = useQuery<MetricGraphResponse>(metricGraphQuery, {
     variables: { input: [...metricQuery] },
     // fetchPolicy: 'no-cache',
   });
@@ -132,7 +86,7 @@ const MetricGraph: FC = () => {
 
   if (graphMeasurements.length) {
     subscribeToMore({
-      document: subscription,
+      document: metricGraphSubscription,
       variables: null,
       updateQuery: (
         prev,

@@ -8,8 +8,8 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { makeStyles } from '@material-ui/core/styles';
 
+import { useAppSelector } from '../../../utils/reduxSelectors';
 import MetricTableCell from './MetricTableCell';
-import { useAppSelector } from '../selectors';
 
 const useStyles = makeStyles((theme) => ({
   root: {

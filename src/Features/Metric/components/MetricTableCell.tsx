@@ -1,40 +1,15 @@
 import React, { FC } from 'react';
-import {
-  useQuery,
-  gql,
-} from '@apollo/client';
 // import LinearProgress from '@material-ui/core/LinearProgress';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
+import { useQuery } from '@apollo/client';
 
-const query = gql`
-  query ($metricName: String!) {
-    getLastKnownMeasurement(metricName: $metricName) {
-      metric
-      at
-      value
-      unit
-    }
-  }
-`;
-
-type MetricTableCellData = {
-  metric: string;
-  at: number;
-  value: number;
-  unit: string;
-};
-type MetricTableCellResponse = {
-  getLastKnownMeasurement: MetricTableCellData;
-};
-
-interface SelectedMetric {
-  metric: string;
-}
+import { metricSelectQuery } from '../selectors';
+import { MetricTableCellResponse, SelectedMetric } from '../types';
 
 const MetricTableCell: FC<SelectedMetric> = ({ metric }: SelectedMetric) => {
   // const classes = useStyles();
-  const { data } = useQuery<MetricTableCellResponse>(query, {
+  const { data } = useQuery<MetricTableCellResponse>(metricSelectQuery, {
     variables: { metricName: metric },
     pollInterval: 5000,
   });
