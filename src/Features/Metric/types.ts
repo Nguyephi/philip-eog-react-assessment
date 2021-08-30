@@ -39,3 +39,16 @@ export interface GraphDataset {
   [key: string]: number;
   at: number;
 }
+
+export interface SelectedMetricData {
+  metricName: string;
+  stroke?: string;
+  after?: number;
+}
+export interface MetricSliceState {
+  metrics: SelectedMetricData[];
+  metricQuery: SelectedMetricData[];
+  graphData: GraphDataset[];
+  uniqueUnits: string[];
+  startTime: number;
+}

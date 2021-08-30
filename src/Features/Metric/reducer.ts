@@ -1,22 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import {
+  MetricSliceState,
+  GraphDataset,
+  SelectedMetricData,
+} from './types';
 
-interface SelectedMetrics {
-  metricName: string;
-  stroke?: string;
-  after?: number;
-}
-
-interface GraphDataset {
-  [key: string]: number;
-  at: number;
-}
-interface MetricSliceState {
-  metrics: SelectedMetrics[];
-  metricQuery: SelectedMetrics[];
-  graphData: GraphDataset[];
-  uniqueUnits: string[];
-  startTime: number;
-}
 const initialState: MetricSliceState = {
   metrics: [],
   metricQuery: [],
@@ -29,7 +17,7 @@ export const metricSlice = createSlice({
   name: 'metric',
   initialState,
   reducers: {
-    addMetric: (state, action: PayloadAction<SelectedMetrics>) => {
+    addMetric: (state, action: PayloadAction<SelectedMetricData>) => {
       state.metrics = [...state.metrics, {
         metricName: action.payload.metricName,
         stroke: Math.floor(Math.random() * 16777215).toString(16),
@@ -41,10 +29,10 @@ export const metricSlice = createSlice({
     },
     deleteMetric: (state, action: PayloadAction<string>) => {
       state.metrics = state.metrics.filter(
-        (metric: SelectedMetrics) => metric.metricName !== action.payload,
+        (metric: SelectedMetricData) => metric.metricName !== action.payload,
       );
       state.metricQuery = state.metricQuery.filter(
-        (metric: SelectedMetrics) => metric.metricName !== action.payload,
+        (metric: SelectedMetricData) => metric.metricName !== action.payload,
       );
     },
     setGraphData: (state, action: PayloadAction<GraphDataset[]>) => {
