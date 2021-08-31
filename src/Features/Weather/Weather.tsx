@@ -7,7 +7,6 @@ import {
   InMemoryCache,
 } from '@apollo/client';
 import { useGeolocation } from 'react-use';
-import LinearProgress from '@material-ui/core/LinearProgress';
 import { Typography } from '@material-ui/core';
 import Chip from '../../components/Chip';
 
@@ -50,7 +49,7 @@ const Weather: FC = () => {
     },
   });
 
-  if (loading) return <LinearProgress />;
+  if (loading) return <Chip label="Loading weather data..." />;
   if (error) return <Typography color="error">{error}</Typography>;
   if (!data) return <Chip label="Weather not found" />;
   const { locationName, description, temperatureinCelsius } = data.getWeatherForLocation;
