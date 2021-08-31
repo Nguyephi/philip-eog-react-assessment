@@ -49,6 +49,6 @@ export interface MetricSliceState {
   metrics: SelectedMetricData[];
   metricQuery: SelectedMetricData[];
   graphData: GraphDataset[];
-  uniqueUnits: string[];
+  // uniqueUnits: string[];
   startTime: number;
 }
