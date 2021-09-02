@@ -1,19 +1,11 @@
 import React, { FC } from 'react';
 import {
-  ApolloClient,
-  ApolloProvider,
   useQuery,
   gql,
-  InMemoryCache,
 } from '@apollo/client';
 import { useGeolocation } from 'react-use';
 import { Typography } from '@material-ui/core';
 import Chip from '../../components/Chip';
-
-const client = new ApolloClient({
-  uri: 'https://react.eogresources.com/graphql',
-  cache: new InMemoryCache(),
-});
 
 const toF = (c: number) => (c * 9) / 5 + 32;
 
@@ -57,8 +49,4 @@ const Weather: FC = () => {
   return <Chip label={`Weather in ${locationName}: ${description} and ${Math.round(toF(temperatureinCelsius))}°`} />;
 };
 
-export default () => (
-  <ApolloProvider client={client}>
-    <Weather />
-  </ApolloProvider>
-);
+export default Weather;
