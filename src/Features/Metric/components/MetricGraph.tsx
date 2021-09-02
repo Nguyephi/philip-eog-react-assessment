@@ -13,7 +13,7 @@ import { useQuery } from '@apollo/client';
 
 import { useAppSelector, useAppDispatch } from '../../../utils/reduxSelectors';
 import { setGraphData } from '../reducer';
-import { metricGraphQuery, metricGraphSubscription } from '../selectors';
+import { metricGraphQuery, metricGraphSubscription } from '../queries';
 import { MetricGraphResponse, GraphDataset, MetricGraphData } from '../types';
 
 const MetricGraph: FC = () => {

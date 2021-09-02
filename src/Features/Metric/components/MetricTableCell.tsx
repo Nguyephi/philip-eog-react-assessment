@@ -4,7 +4,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
 import { useQuery } from '@apollo/client';
 
-import { metricSelectQuery } from '../selectors';
+import { metricSelectQuery } from '../queries';
 import { MetricTableCellResponse, SelectedMetric } from '../types';
 
 const MetricTableCell: FC<SelectedMetric> = ({ metric }: SelectedMetric) => {

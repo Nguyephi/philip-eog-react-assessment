@@ -15,7 +15,7 @@ import {
   setStartTime,
   clearSelectedMetrics,
 } from '../reducer';
-import { getMetricQuery } from '../selectors';
+import { getMetricQuery } from '../queries';
 import { MetricListResponse } from '../types';
 import Chip from '../../../components/Chip';
 
