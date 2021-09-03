@@ -48,6 +48,6 @@ export interface SelectedMetricData {
 export interface MetricSliceState {
   metrics: SelectedMetricData[];
   metricQuery: SelectedMetricData[];
-  graphData: GraphDataset[];
+  graphData: MetricGraphData[];
   startTime: number;
 }

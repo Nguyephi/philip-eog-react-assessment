@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
   MetricSliceState,
-  GraphDataset,
+  MetricGraphData,
   SelectedMetricData,
 } from './types';
 
@@ -35,7 +35,7 @@ export const metricSlice = createSlice({
         (metric: SelectedMetricData) => metric.metricName !== action.payload,
       );
     },
-    setGraphData: (state, action: PayloadAction<GraphDataset[]>) => {
+    setGraphData: (state, action: PayloadAction<MetricGraphData[]>) => {
       state.graphData = [...action.payload];
     },
     setStartTime: (state, action: PayloadAction<number>) => {
