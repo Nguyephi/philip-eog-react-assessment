@@ -79,9 +79,19 @@ const MetricGraph: FC = () => {
   //   return chartData;
   // };
 
-  if (graphMeasurements.every(graph => graph.measurements.length > graphData.length)) {
-    console.log('dispatch', graphData);
-    dispatch(setGraphData(getGraphData(metricState)));
+  if (!graphData.length
+    || !graphMeasurements.every(
+      (graph, idx) => (
+        graph.metric === graphData[idx]?.metric
+      ),
+    )
+    || graphMeasurements.every(
+      (graph, idx) => (
+        graph.measurements.length > graphData[idx]?.measurements.length
+      ),
+    )) {
+    // console.log('dispatch', graphData);
+    dispatch(setGraphData(graphMeasurements));
   }
 
   if (graphMeasurements.length) {
@@ -125,7 +135,7 @@ const MetricGraph: FC = () => {
 
   return (
     <ResponsiveContainer height={500}>
-      <LineChart data={graphData}>
+      <LineChart data={getGraphData(metricState)}>
         <XAxis
           dataKey="at"
           tickFormatter={formatXAxis}

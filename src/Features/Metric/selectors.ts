@@ -58,7 +58,7 @@ export const getGraphData = createSelector(
       && metrics.length === graphData.length) {
       chartData = handleMultiDataSet(metrics, graphData, chartData);
     }
-
+    console.log('cd', chartData);
     return chartData;
   },
 );
