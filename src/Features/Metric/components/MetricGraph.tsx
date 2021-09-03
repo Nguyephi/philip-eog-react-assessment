@@ -14,15 +14,15 @@ import { useQuery } from '@apollo/client';
 import { useAppSelector, useAppDispatch } from '../../../utils/reduxSelectors';
 import { setGraphData } from '../reducer';
 import { metricGraphQuery, metricGraphSubscription } from '../queries';
-import { MetricGraphResponse, GraphDataset, MetricGraphData } from '../types';
+import { MetricGraphResponse, MetricGraphData } from '../types';
+import { getGraphData } from '../selectors';
 
 const MetricGraph: FC = () => {
   const dispatch = useAppDispatch();
-  const selectedMetrics = useAppSelector(state => state.metrics.metrics);
-  const metricQuery = useAppSelector(state => state.metrics.metricQuery);
-  const graphData = useAppSelector(state => state.metrics.graphData);
+  const metricState = useAppSelector(state => state.metrics);
+  const { metrics: selectedMetrics, metricQuery, graphData } = metricState;
 
-  const { subscribeToMore, loading, data } = useQuery<MetricGraphResponse>(metricGraphQuery, {
+  const { subscribeToMore, data } = useQuery<MetricGraphResponse>(metricGraphQuery, {
     variables: { input: [...metricQuery] },
     // fetchPolicy: 'no-cache',
   });
@@ -33,55 +33,55 @@ const MetricGraph: FC = () => {
 
   const { getMultipleMeasurements: graphMeasurements } = data;
 
-  const handleFirstDataSet = () => {
-    const chartData: any[] = [];
-    graphMeasurements[0].measurements.forEach((m) => {
-      chartData.push({
-        at: m.at,
-        [m.metric]: m.value,
-      });
-    });
-    return chartData;
-  };
+  // const handleFirstDataSet = () => {
+  //   const chartData: any[] = [];
+  //   graphMeasurements[0].measurements.forEach((m) => {
+  //     chartData.push({
+  //       at: m.at,
+  //       [m.metric]: m.value,
+  //     });
+  //   });
+  //   return chartData;
+  // };
 
-  const handleMultiDataSet = (dataSet: any[]) => {
-    const chartData = [...dataSet];
-    selectedMetrics.forEach((metric, idx) => {
-      if (!Object.prototype.hasOwnProperty.call(graphMeasurements[idx], metric.metricName)) {
-        graphMeasurements[idx].measurements.forEach((m, mIdx) => {
-          if (m?.at === chartData[mIdx]?.at) {
-            chartData[mIdx] = {
-              [m.metric]: m.value,
-              ...chartData[mIdx],
-            };
-          }
-        });
-      }
-    });
-    return chartData;
-  };
+  // const handleMultiDataSet = (dataSet: any[]) => {
+  //   const chartData = [...dataSet];
+  //   selectedMetrics.forEach((metric, idx) => {
+  //     if (!Object.prototype.hasOwnProperty.call(graphMeasurements[idx], metric.metricName)) {
+  //       graphMeasurements[idx].measurements.forEach((m, mIdx) => {
+  //         if (m?.at === chartData[mIdx]?.at) {
+  //           chartData[mIdx] = {
+  //             [m.metric]: m.value,
+  //             ...chartData[mIdx],
+  //           };
+  //         }
+  //       });
+  //     }
+  //   });
+  //   return chartData;
+  // };
 
-  const getChartData = () => {
-    let chartData: any[] = [];
-    if (!graphMeasurements || !graphMeasurements.length) {
-      return [];
-    }
+  // const getChartData = () => {
+  //   let chartData: any[] = [];
+  //   if (!graphMeasurements || !graphMeasurements.length) {
+  //     return [];
+  //   }
 
-    if (!chartData.length) {
-      chartData = handleFirstDataSet();
-    }
+  //   if (!chartData.length) {
+  //     chartData = handleFirstDataSet();
+  //   }
 
-    if (!loading && selectedMetrics.length > 1
-      && selectedMetrics.length === graphMeasurements.length) {
-      chartData = handleMultiDataSet(chartData);
-    }
+  //   if (!loading && selectedMetrics.length > 1
+  //     && selectedMetrics.length === graphMeasurements.length) {
+  //     chartData = handleMultiDataSet(chartData);
+  //   }
 
-    return chartData;
-  };
+  //   return chartData;
+  // };
 
   if (graphMeasurements.every(graph => graph.measurements.length > graphData.length)) {
-    const newGraphData: GraphDataset[] = getChartData();
-    dispatch(setGraphData(newGraphData));
+    console.log('dispatch', graphData);
+    dispatch(setGraphData(getGraphData(metricState)));
   }
 
   if (graphMeasurements.length) {
