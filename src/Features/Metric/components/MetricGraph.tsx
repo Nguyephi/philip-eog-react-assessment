@@ -33,64 +33,26 @@ const MetricGraph: FC = () => {
 
   const { getMultipleMeasurements: graphMeasurements } = data;
 
-  // const handleFirstDataSet = () => {
-  //   const chartData: any[] = [];
-  //   graphMeasurements[0].measurements.forEach((m) => {
-  //     chartData.push({
-  //       at: m.at,
-  //       [m.metric]: m.value,
-  //     });
-  //   });
-  //   return chartData;
-  // };
-
-  // const handleMultiDataSet = (dataSet: any[]) => {
-  //   const chartData = [...dataSet];
-  //   selectedMetrics.forEach((metric, idx) => {
-  //     if (!Object.prototype.hasOwnProperty.call(graphMeasurements[idx], metric.metricName)) {
-  //       graphMeasurements[idx].measurements.forEach((m, mIdx) => {
-  //         if (m?.at === chartData[mIdx]?.at) {
-  //           chartData[mIdx] = {
-  //             [m.metric]: m.value,
-  //             ...chartData[mIdx],
-  //           };
-  //         }
-  //       });
-  //     }
-  //   });
-  //   return chartData;
-  // };
-
-  // const getChartData = () => {
-  //   let chartData: any[] = [];
-  //   if (!graphMeasurements || !graphMeasurements.length) {
-  //     return [];
-  //   }
-
-  //   if (!chartData.length) {
-  //     chartData = handleFirstDataSet();
-  //   }
-
-  //   if (!loading && selectedMetrics.length > 1
-  //     && selectedMetrics.length === graphMeasurements.length) {
-  //     chartData = handleMultiDataSet(chartData);
-  //   }
-
-  //   return chartData;
-  // };
-
-  if (!graphData.length
-    || !graphMeasurements.every(
+  const hasNewMetric = () => (
+    !graphMeasurements.every(
       (graph, idx) => (
         graph.metric === graphData[idx]?.metric
       ),
     )
-    || graphMeasurements.every(
+  );
+
+  const hasNewSubscriptionData = () => (
+    graphMeasurements.every(
       (graph, idx) => (
         graph.measurements.length > graphData[idx]?.measurements.length
       ),
-    )) {
-    // console.log('dispatch', graphData);
+    )
+  );
+
+  if (!graphData.length
+    || hasNewMetric()
+    || hasNewSubscriptionData()
+  ) {
     dispatch(setGraphData(graphMeasurements));
   }
 
