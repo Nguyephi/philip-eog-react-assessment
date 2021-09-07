@@ -129,7 +129,6 @@ const MetricSelectInput: FC = () => {
                     <Chip
                       key={metricName}
                       label={metricName}
-                      onDelete={() => handleDelete(metricName)}
                       classes={{
                         root: classes.chip,
                       }}
