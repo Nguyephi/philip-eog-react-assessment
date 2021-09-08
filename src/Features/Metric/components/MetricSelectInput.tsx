@@ -23,10 +23,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
     display: 'block',
-    height: theme.spacing(25),
-    [theme.breakpoints.down('xs')]: {
-      height: theme.spacing(27),
-    },
+    marginBottom: theme.spacing(4),
   },
   titleContainer: {
     marginTop: theme.spacing(5),
@@ -43,9 +40,15 @@ const useStyles = makeStyles((theme) => ({
     width: '80%',
     margin: 'auto',
   },
+  menuSelect: {
+    '& .MuiSelect-selectMenu': {
+      whiteSpace: 'normal',
+    },
+  },
   chip: {
-    marginLeft: theme.spacing(1 / 2),
     marginRight: theme.spacing(1 / 2),
+    marginLeft: theme.spacing(1 / 2),
+    marginBottom: theme.spacing(1),
   },
 }));
 
@@ -103,6 +106,7 @@ const MetricSelectInput: FC = () => {
       <Grid item className={classes.select}>
         <FormControl fullWidth>
           <Select
+            className={classes.menuSelect}
             variant="outlined"
             MenuProps={{
               anchorOrigin: {
@@ -129,6 +133,7 @@ const MetricSelectInput: FC = () => {
                     <Chip
                       key={metricName}
                       label={metricName}
+                      onDelete={() => handleDelete(metricName)}
                       classes={{
                         root: classes.chip,
                       }}
